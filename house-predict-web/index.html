@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>House Price Prediction Using Data Mining</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="logged-out">
+
+<!-- ============ LOGIN / REGISTER ============ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-art">
+    <div class="logo">🏠</div>
+    <h1>House Price<br>Prediction</h1>
+    <p>Compare data mining algorithms on real house data and find out which one predicts best.</p>
+    <ul class="auth-points">
+      <li><span>🏆</span> 7 algorithms compared head-to-head</li>
+      <li><span>📊</span> Accuracy shown for every algorithm</li>
+      <li><span>🔮</span> Predict the price of any house</li>
+    </ul>
+  </div>
+  <div class="auth-side">
+    <div class="auth-card">
+      <h2 id="auth-title">Welcome back</h2>
+      <p class="sub" id="auth-sub">Login to continue</p>
+      <div class="auth-tabs">
+        <button type="button" data-auth-tab="login" class="active">Login</button>
+        <button type="button" data-auth-tab="register">Register</button>
+      </div>
+      <div id="auth-error" class="error-box hidden"></div>
+      <div id="auth-ok" class="note-box ok hidden"></div>
+
+      <form id="login-form" autocomplete="on" novalidate>
+        <div class="field"><label for="login-id">Username or Email</label><input type="text" id="login-id" autocomplete="username"></div>
+        <div class="field"><label for="login-password">Password</label><input type="password" id="login-password" autocomplete="current-password"></div>
+        <label class="check"><input type="checkbox" id="login-remember"> Keep me logged in</label>
+        <button type="submit" class="btn primary wide">Login</button>
+        <p class="auth-hint">Default admin &nbsp;→&nbsp; username <code>admin</code> &nbsp; password <code>Admin@123</code></p>
+      </form>
+
+      <form id="register-form" class="hidden" autocomplete="off" novalidate>
+        <div class="field"><label>Register as</label>
+          <div class="role-pick">
+            <label><input type="radio" name="reg-role" value="user" checked><b>👤 User</b>Compare and predict</label>
+            <label><input type="radio" name="reg-role" value="admin"><b>🛡️ Admin</b>Needs secret code</label>
+          </div></div>
+        <div class="field hidden" id="reg-code-box"><label for="reg-code">Admin secret code</label><input type="password" id="reg-code" autocomplete="off"></div>
+        <div class="field"><label for="reg-name">Full name</label><input type="text" id="reg-name" autocomplete="name"></div>
+        <div class="field"><label for="reg-email">Email</label><input type="email" id="reg-email" autocomplete="email"></div>
+        <div class="field"><label for="reg-username">Username</label><input type="text" id="reg-username" autocomplete="off"><small>3-20 letters, numbers, _ or .</small></div>
+        <div class="field"><label for="reg-password">Password</label><input type="password" id="reg-password" autocomplete="new-password"><small>6+ characters, with a letter and a number</small></div>
+        <div class="field"><label for="reg-confirm">Confirm password</label><input type="password" id="reg-confirm" autocomplete="new-password"></div>
+        <button type="submit" class="btn primary wide">Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+<header class="top">
+  <div>
+    <h1 id="page-title">Dashboard</h1>
+    <span class="sub">Dataset: <span class="chip-dataset" id="dataset-name">none loaded</span></span>
+  </div>
+  <div class="top-buttons">
+    <label class="btn primary admin-only" for="csv-file">⬆ Upload CSV</label>
+    <input type="file" id="csv-file" accept=".csv" hidden>
+    <button class="btn" id="load-sample">📂 Load Sample Data</button>
+    <div class="user-box">
+      <span class="avatar" id="user-avatar">U</span>
+      <span id="user-label"></span>
+      <button class="btn small" id="logout-btn">Logout</button>
+    </div>
+  </div>
+</header>
+<div id="global-message" class="message hidden"></div>
+
+<nav id="nav">
+  <div class="brand"><div class="brand-logo">🏠</div><div><b>House Price</b><span>Data Mining Project</span></div></div>
+  <div class="nav-label">Overview</div>
+  <button data-page="dashboard" class="active"><span class="ico">📊</span>Dashboard</button>
+  <button data-page="dataset"><span class="ico">🗂️</span>Dataset</button>
+  <button data-page="preprocessing" class="admin-only"><span class="ico">🧹</span>Preprocessing</button>
+  <button data-page="analysis"><span class="ico">📈</span>Analysis</button>
+  <div class="nav-label">Models</div>
+  <button data-page="compareall" class="star"><span class="ico">🏆</span>Compare All Algorithms</button>
+  <button data-page="regression"><span class="ico">🎯</span>Price Prediction</button>
+  <button data-page="classification"><span class="ico">🏷️</span>Price Category</button>
+  <button data-page="predict"><span class="ico">🔮</span>Predict a House</button>
+  <div class="nav-label admin-only">Admin</div>
+  <button data-page="admin" class="admin-only"><span class="ico">🛡️</span>Admin Panel</button>
+  <div class="nav-foot">DWM Mini Project</div>
+</nav>
+
+<main>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="page-dashboard" class="page">
+  <div class="hero">
+    <div>
+      <h2>House Price Prediction</h2>
+      <p id="dash-welcome"></p>
+      <div class="hero-actions">
+        <button class="btn primary" data-go="compareall">🏆 Compare All Algorithms</button>
+        <button class="btn" data-go="predict">🔮 Predict a House</button>
+      </div>
+    </div>
+    <div class="hero-emoji">🏡</div>
+  </div>
+  <div id="dash-empty" class="empty-callout">📂 <b>No dataset loaded yet.</b> <span class="admin-only-inline">Upload your own CSV, or </span>click <b>Load Sample Data</b> (top right) to start.</div>
+  <div id="dash-cards" class="cards"></div>
+
+  <div id="dash-admin-box" class="hidden">
+    <h3>Website registrations</h3>
+    <div id="dash-admin" class="cards"></div>
+  </div>
+
+  <h3>Start here</h3>
+  <div class="cards techniques">
+    <div class="card highlight"><div class="big-ico">🏆</div><h4>Compare All Algorithms</h4><p>7 algorithms, one verdict. See accuracy and the best one.</p>
+      <button class="btn small primary" data-go="compareall">Open</button></div>
+    <div class="card"><div class="big-ico">🎯</div><h4>Price Prediction</h4><p>Predict the exact price. R², MAE, RMSE.</p>
+      <button class="btn small" data-go="regression">Open</button></div>
+    <div class="card"><div class="big-ico">🏷️</div><h4>Price Category</h4><p>Low / Medium / High. Accuracy, F1, J48 tree.</p>
+      <button class="btn small" data-go="classification">Open</button></div>
+    <div class="card"><div class="big-ico">🔮</div><h4>Predict a House</h4><p>Enter house details, get every model's price.</p>
+      <button class="btn small" data-go="predict">Open</button></div>
+  </div>
+  <div id="dash-history-box" class="hidden">
+    <h3>My recent comparisons</h3>
+    <div id="dash-history" class="table-wrap"></div>
+  </div>
+</section>
+
+<!-- ============ DATASET ============ -->
+<section id="page-dataset" class="page hidden">
+  <h2>Dataset</h2>
+  <div id="dataset-cards" class="cards"></div>
+  <h3>Columns</h3>
+  <div id="column-table" class="table-wrap"></div>
+  <h3>Data</h3>
+  <div id="rows-table" class="table-wrap"></div>
+  <div class="pager">
+    <button class="btn small" id="prev-page">← Previous</button>
+    <span id="page-label"></span>
+    <button class="btn small" id="next-page">Next →</button>
+  </div>
+  <h3>Numerical columns</h3>
+  <div id="numeric-stats" class="table-wrap"></div>
+  <h3>Categorical columns</h3>
+  <div id="categorical-stats" class="table-wrap"></div>
+</section>
+
+<!-- ============ PREPROCESSING ============ -->
+<section id="page-preprocessing" class="page hidden">
+  <h2>Data Preprocessing</h2>
+  <div class="panel">
+    <label class="check"><input type="checkbox" id="pp-duplicates" checked> <b>Remove duplicate rows</b></label>
+    <div class="field"><b>Missing values</b>
+      <label class="radio"><input type="radio" name="pp-missing" value="fill" checked> Fill them (median / most common value)</label>
+      <label class="radio"><input type="radio" name="pp-missing" value="drop"> Delete rows with missing values</label>
+      <label class="radio"><input type="radio" name="pp-missing" value="none"> Do nothing</label>
+    </div>
+    <div class="field"><b>Remove price outliers</b> <small>(IQR rule, optional)</small><br>
+      <select id="pp-outlier"></select></div>
+    <div class="field"><b>Remove columns</b> <small>(for example an ID column)</small>
+      <div id="pp-drop" class="checks"></div></div>
+    <button class="btn primary" id="pp-apply">Apply Preprocessing</button>
+    <button class="btn" id="pp-reset">Reset to Original</button>
+  </div>
+  <div id="pp-result"></div>
+</section>
+
+<!-- ============ ANALYSIS ============ -->
+<section id="page-analysis" class="page hidden">
+  <h2>Analysis</h2>
+  <div id="analysis-cards" class="cards"></div>
+  <h3>Charts</h3>
+  <div id="quick-box" class="panel hidden"><b>Quick charts:</b> <span id="quick-buttons"></span></div>
+  <div class="panel row">
+    <div class="field"><label>Chart type</label>
+      <select id="ch-type">
+        <option value="bar">Bar chart</option><option value="pie">Pie chart</option>
+        <option value="hist">Histogram</option><option value="line">Line chart</option>
+        <option value="scatter">Scatter plot</option><option value="heatmap">Correlation heatmap</option></select></div>
+    <div class="field" id="ch-x-box"><label id="ch-x-label">X column</label><select id="ch-x"></select></div>
+    <div class="field" id="ch-y-box"><label>Y column (optional)</label><select id="ch-y"></select></div>
+    <div class="field" id="ch-agg-box"><label>Value shown</label>
+      <select id="ch-agg"><option value="count">Count of records</option><option value="mean">Average of Y</option><option value="sum">Sum of Y</option></select></div>
+    <div class="field"><label>&nbsp;</label><button class="btn primary" id="ch-draw">Draw Chart</button></div>
+  </div>
+  <div id="ch-result" class="chart-box"></div>
+  <h3>Statistics</h3>
+  <div id="analysis-stats" class="table-wrap"></div>
+</section>
+
+<!-- ============ REGRESSION COMPARISON ============ -->
+<section id="page-regression" class="page hidden">
+  <h2>Price Prediction <small>(regression - predicts the exact price)</small></h2>
+  <div class="panel">
+    <div class="row">
+      <div class="field"><label>Price column</label><select id="rg-target"></select></div>
+      <div class="field"><label>Decision Tree depth</label>
+        <select id="rg-depth"><option>3</option><option>5</option><option selected>8</option><option>10</option></select></div>
+    </div>
+    <div class="field"><label>Feature columns</label>
+      <div id="rg-features" class="checks"></div>
+      <a href="#" class="tiny-link" data-all="rg-features">Select all</a> | <a href="#" class="tiny-link" data-none="rg-features">Clear</a></div>
+    <button class="btn primary" id="rg-run">Compare Regression Models</button>
+  </div>
+  <div id="rg-result"></div>
+</section>
+
+<!-- ============ CLASSIFICATION COMPARISON ============ -->
+<section id="page-classification" class="page hidden">
+  <h2>Price Category <small>(classification - Low / Medium / High)</small></h2>
+  <div class="panel">
+    <div class="row">
+      <div class="field"><label>Price column</label><select id="cl-target"></select></div>
+      <div class="field"><label>Number of categories</label>
+        <select id="cl-classes"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label>Tree depth</label>
+        <select id="cl-depth"><option>3</option><option>4</option><option selected>5</option><option>6</option></select></div>
+    </div>
+    <div class="field"><label>Feature columns</label>
+      <div id="cl-features" class="checks"></div>
+      <a href="#" class="tiny-link" data-all="cl-features">Select all</a> | <a href="#" class="tiny-link" data-none="cl-features">Clear</a></div>
+    <button class="btn primary" id="cl-run">Compare Classification Models</button>
+  </div>
+  <div id="cl-result"></div>
+</section>
+
+<!-- ============ COMPARE ALL ============ -->
+<section id="page-compareall" class="page hidden">
+  <h2>Compare All Algorithms</h2>
+  <div class="explain">All 7 algorithms are trained on the <b>same dataset</b> and tested on the same houses. Pick your options and click Compare.</div>
+  <div class="panel">
+    <div class="row">
+      <div class="field"><label>Price column</label><select id="al-target"></select></div>
+      <div class="field"><label>Price categories</label>
+        <select id="al-classes"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label>Tree depth</label>
+        <select id="al-depth"><option>3</option><option>4</option><option>5</option><option selected>6</option><option>8</option><option>10</option></select></div>
+    </div>
+    <div class="field"><label>Feature columns</label>
+      <div id="al-features" class="checks"></div>
+      <a href="#" class="tiny-link" data-all="al-features">Select all</a> | <a href="#" class="tiny-link" data-none="al-features">Clear</a></div>
+    <button class="btn primary" id="al-run">🏆 Compare All Algorithms</button>
+  </div>
+  <div id="al-result"></div>
+  <div id="al-across"></div>
+</section>
+
+<!-- ============ PREDICT ============ -->
+<section id="page-predict" class="page hidden">
+  <h2>Predict a House</h2>
+  <div class="explain">Run <b>Compare All Algorithms</b> (or Price Prediction) once, then enter house details to see every model's price.</div>
+  <div id="predict-form-box"></div>
+  <div id="predict-result"></div>
+</section>
+
+<!-- ============ ADMIN PANEL ============ -->
+<section id="page-admin" class="page hidden">
+  <h2>Admin Panel</h2>
+  <div id="admin-banner"></div>
+  <div id="admin-cards" class="cards"></div>
+  <div id="admin-message"></div>
+  <div class="admin-grid">
+    <div><h3>New registrations - last 7 days</h3><div id="admin-chart" class="img-box"></div></div>
+    <div><h3>Latest registrations</h3><div id="admin-recent" class="table-wrap"></div></div>
+  </div>
+  <h3>All registered accounts</h3>
+  <div id="admin-users" class="table-wrap"></div>
+  <h3>Comparison history</h3>
+  <div id="admin-history" class="table-wrap"></div>
+  <h3>Login and account activity</h3>
+  <div id="admin-activity" class="table-wrap"></div>
+  <div class="panel" style="margin-top:14px">
+    <button class="btn small" id="clear-history">Clear comparison history</button>
+    <button class="btn small" id="clear-activity">Clear activity log</button>
+  </div>
+</section>
+
+</main>
+<footer>DWM Assignment 10 - House Price Prediction Using Data Mining</footer>
+</div><!-- /#app -->
+
+<script src="js/sample_data.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/models.js"></script>
+<script src="js/compare.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/auth_ui.js"></script>
+</body>
+</html>
